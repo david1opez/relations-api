@@ -8,6 +8,7 @@ import { StartServer } from './utils/ExpressUtils';
 
 // ROUTES
 import Users from './routes/Users';
+import Auth from './routes/Auth';
 
 const app = express();
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(bodyParser.json({ limit: '1mb' }));
 
 // ROUTES
 app.use('/users', Users);
+app.use('/auth', Auth);
 
 // INITIALIZE SERVER
-StartServer(app, 3000);
+StartServer(app, 3001);
