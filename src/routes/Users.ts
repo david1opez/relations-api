@@ -8,10 +8,10 @@ const router = Router();
 
 // GET ?id=xxx
 router.get('/', async (req, res) => {
-    const { id } = req.query;
-    if (!id) return Error(res, 400, 'Missing user id');
+    const { uid } = req.query;
+    if (!uid) return Error(res, 400, 'Missing user id');
     try {
-        const user = await prisma.user.findUnique({ where: { uid: String(id) } });
+        const user = await prisma.user.findUnique({ where: { uid: String(uid) } });
         if (!user) return Error(res, 404, 'User not found');
         SendResponse(res, 200, user);
     } catch (err) {
@@ -21,11 +21,11 @@ router.get('/', async (req, res) => {
 
 // PUT ?id=xxx
 router.put('/', async (req, res) => {
-    const { id } = req.query;
-    if (!id) return Error(res, 400, 'Missing user id');
+    const { uid } = req.query;
+    if (!uid) return Error(res, 400, 'Missing user id');
     try {
         const updated = await prisma.user.update({
-            where: { uid: String(id) },
+            where: { uid: String(uid) },
             data: req.body,
         });
         SendResponse(res, 200, updated);
@@ -36,10 +36,10 @@ router.put('/', async (req, res) => {
 
 // DELETE ?id=xxx
 router.delete('/', async (req, res) => {
-    const { id } = req.query;
-    if (!id) return Error(res, 400, 'Missing user id');
+    const { uid } = req.query;
+    if (!uid) return Error(res, 400, 'Missing user id');
     try {
-        await prisma.user.delete({ where: { uid: String(id) } });
+        await prisma.user.delete({ where: { uid: String(uid) } });
         SendResponse(res, 200, { success: true });
     } catch (err) {
         Error(res, 500, err);
