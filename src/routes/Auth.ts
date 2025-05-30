@@ -4,7 +4,7 @@ import { Router } from "express";
 import { SendResponse, Error } from "../utils/ExpressUtils";
 
 // TYPES
-import { MicrosoftAuthResponse, MicrosoftProfile } from "../types/MicrosoftTypes";
+import { MicrosoftAuthResponse, MicrosoftProfile, MicrosoftErrorResponse } from "../types/MicrosoftTypes";
 
 const router = Router();
 
@@ -25,15 +25,15 @@ router.post('/', async (req, res) => {
                 client_id: process.env.MSFT_CLIENT_ID || '',
                 scope: 'openid profile User.Read',
                 code: code,
-                redirect_uri: process.env.MSFT_REDIRECT_URL || '',
+                redirect_uri: process.env.MSFT_REDIRECT_URI || '',
                 grant_type: 'authorization_code',
                 client_secret: process.env.MSFT_CLIENT_SECRET || '' 
             })
         })
         .then(response => response.json())
-        .then((data: MicrosoftAuthResponse) => {
-            if (!data.access_token) {
-                return Error(res, 400, 'Failed to obtain access token');
+        .then((data: MicrosoftAuthResponse | MicrosoftErrorResponse) => {
+            if (!('access_token' in data)) {
+                return Error(res, 400, (data as MicrosoftErrorResponse));
             }
 
             fetch("https://graph.microsoft.com/v1.0/me", {

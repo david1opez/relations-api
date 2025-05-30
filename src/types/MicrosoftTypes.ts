@@ -21,3 +21,12 @@ export type MicrosoftProfile = {
     officeLocation: string | null;
     businessPhones: string[];
 }
+
+export type MicrosoftErrorResponse = {
+    error: string;
+    error_description: string;
+    error_codes: number[];
+    timestamp: string;
+    trace_id: string;
+    correlation_id: string;
+}
