@@ -13,7 +13,13 @@ router.get('/', async (req, res) => {
 
     try {
         const user = await prisma.user.findFirst({
-            where: { email: String(email), uid: { not: null } }
+            where: {
+            email: String(email),
+            uid: {
+                not: null,
+                notIn: [""]
+            }
+            }
         });
 
         if (!user) return Error(res, 404, 'User not found');
