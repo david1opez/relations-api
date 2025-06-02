@@ -9,7 +9,9 @@ const router = Router();
 // GET ?id=xxx
 router.get('/', async (req, res) => {
     const { uid } = req.query;
+
     if (!uid) return Error(res, 400, 'Missing user id');
+
     try {
         const user = await prisma.user.findUnique({ where: { uid: String(uid) } });
         if (!user) return Error(res, 404, 'User not found');
@@ -19,10 +21,11 @@ router.get('/', async (req, res) => {
     }
 });
 
-// PUT ?id=xxx
-router.put('/', async (req, res) => {
+router.post('/update', async (req, res) => {
     const { uid } = req.query;
+
     if (!uid) return Error(res, 400, 'Missing user id');
+
     try {
         const updated = await prisma.user.update({
             where: { uid: String(uid) },
@@ -30,12 +33,16 @@ router.put('/', async (req, res) => {
         });
         SendResponse(res, 200, updated);
     } catch (err) {
-        Error(res, 500, err);
+        if ((err as any)?.meta?.cause === 'No record was found for an update') {
+            return Error(res, 404, 'User not found');
+        } else {
+            Error(res, 500, err);
+        }
     }
 });
 
 // DELETE ?id=xxx
-router.delete('/', async (req, res) => {
+router.delete('/delete', async (req, res) => {
     const { uid } = req.query;
     if (!uid) return Error(res, 400, 'Missing user id');
     try {
@@ -56,18 +63,25 @@ router.post('/create', async (req, res) => {
     }
 });
 
-// PUT /create
-router.put('/create', async (req, res) => {
+// Assign a UID to an existing user by email
+router.post('/assignUID', async (req, res) => {
     const { uid, email } = req.body;
+
     if (!uid || !email) return Error(res, 400, 'Missing uid or email');
+
     try {
         const user = await prisma.user.update({
             where: { email: String(email) },
             data: { uid: String(uid) },
         });
+
         SendResponse(res, 200, user);
     } catch (err) {
-        Error(res, 500, err);
+        if ((err as any)?.meta?.cause === 'No record was found for an update.') {
+            return Error(res, 404, 'User not found');
+        } else {
+            Error(res, 500, err);
+        }
     }
 });
 
