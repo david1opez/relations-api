@@ -6,15 +6,18 @@ import prisma from "../utils/Prisma";
 
 const router = Router();
 
-// GET ?id=xxx
 router.get('/', async (req, res) => {
-    const { uid } = req.query;
+    const { email } = req.query;
 
-    if (!uid) return Error(res, 400, 'Missing user id');
+    if (!email) return Error(res, 400, 'Missing user email');
 
     try {
-        const user = await prisma.user.findUnique({ where: { uid: String(uid) } });
+        const user = await prisma.user.findFirst({
+            where: { email: String(email), uid: { not: null } }
+        });
+
         if (!user) return Error(res, 404, 'User not found');
+
         SendResponse(res, 200, user);
     } catch (err) {
         Error(res, 500, err);
