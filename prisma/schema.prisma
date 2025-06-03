@@ -18,12 +18,14 @@ model User {
   techSupportCalls SupportCall[]
   callParticipants CallParticipant[]
   activityLogs ActivityLog[]
+  userProjects UserProject[]
 }
 
 model Project {
   projectID          Int      @id @default(autoincrement())
   name               String
   description        String?
+  status             String?
   problemDescription String?
   reqFuncionales     String?
   reqNoFuncionales   String?
@@ -32,6 +34,7 @@ model Project {
   calls              Call[]
   projectCalls ProjectCall[]
   activityLogs ActivityLog[]
+  userProjects UserProject[]
 }
 
 model Call {
@@ -106,4 +109,16 @@ model ActivityLog {
   project            Project?       @relation(fields: [projectID], references: [projectID], onDelete: Cascade)
   projectCall        ProjectCall?   @relation(fields: [projectCallID], references: [projectCallID], onDelete: Cascade)
   supportCall        SupportCall?   @relation(fields: [supportCallID], references: [supportCallID], onDelete: Cascade)
+}
+
+model UserProject {
+  userProjectID Int    @id @default(autoincrement())
+  userID       Int
+  projectID    Int
+  role         String?
+  joinedAt     DateTime?  
+  user         User   @relation(fields: [userID], references: [userID], onDelete: Cascade)
+  project      Project @relation(fields: [projectID], references: [projectID], onDelete: Cascade)
+  
+  @@unique([userID, projectID])
 }
