@@ -10,6 +10,7 @@ import { StartServer } from './utils/ExpressUtils';
 import Users from './routes/Users';
 import Auth from './routes/Auth';
 import Activity from './routes/Activity';
+import Projects from './routes/Projects';
 
 const app = express();
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(bodyParser.json({ limit: '1mb' }));
 app.use('/users', Users);
 app.use('/auth', Auth);
 app.use('/activity', Activity);
+app.use('/projects', Projects);
 
 // INITIALIZE SERVER
 StartServer(app, 3001);
