@@ -17,6 +17,7 @@ router.get('/recent', async (req, res) => {
             where: { uid: String(uid) },
             select: { userID: true, name: true }
         });
+
         if (!user) return Error(res, 404, 'User not found');
 
         // Get all projectIDs where user participated in at least one call
@@ -195,5 +196,39 @@ router.get('/stats', async (req, res) => {
         Error(res, 500, err);
     }
 });
+
+router.post('/log', async (req, res) => {
+    const { uid, action } = req.body;
+
+    const projectID = req.body.projectID || null;
+    const projectCallID = req.body.projectCallID || null;
+    const supportCallID = req.body.supportCallID || null;
+
+    if (!uid || !action) return Error(res, 400, 'Missing uid or action');
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: { uid: String(uid) },
+            select: { userID: true }
+        });
+
+        if (!user) return Error(res, 404, 'User not found');
+
+        const activityLog = await prisma.activityLog.create({
+            data: {
+                userID: user.userID,
+                action,
+                projectID: projectID ? Number(projectID) : null,
+                projectCallID: projectCallID ? Number(projectCallID) : null,
+                supportCallID: supportCallID ? Number(supportCallID) : null,
+                timestamp: new Date()
+            }
+        });
+
+        return SendResponse(res, 201, activityLog);
+    } catch (err) {
+        Error(res, 500, err);
+    }
+})
 
 export default router;
