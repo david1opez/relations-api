@@ -61,7 +61,7 @@ model ProjectCall {
 }
 
 model SupportCall {
-  techSupportCallID Int    @id @default(autoincrement())
+  supportCallID Int    @id @default(autoincrement())
   callID           Int
   userID           Int
   issueDescription String?
@@ -100,10 +100,10 @@ model ActivityLog {
   timestamp          DateTime @default(now())
   projectID          Int?
   projectCallID      Int?
-  techSupportCallID  Int?
+  supportCallID      Int?
 
   user               User           @relation(fields: [userID], references: [userID], onDelete: Cascade)
   project            Project?       @relation(fields: [projectID], references: [projectID], onDelete: Cascade)
   projectCall        ProjectCall?   @relation(fields: [projectCallID], references: [projectCallID], onDelete: Cascade)
-  supportCall        SupportCall?   @relation(fields: [techSupportCallID], references: [techSupportCallID], onDelete: Cascade)
+  supportCall        SupportCall?   @relation(fields: [supportCallID], references: [supportCallID], onDelete: Cascade)
 }
