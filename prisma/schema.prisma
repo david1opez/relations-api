@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Department {
-  departmentID Int    @id @default(autoincrement())
-  name         String @unique
-  users        User[]
-}
-
 model User {
   userID       Int    @id @default(autoincrement())
   uid          String?  @unique
@@ -20,29 +14,9 @@ model User {
   email        String    @unique
   role         String?
   profilePicture String? 
-  departmentID Int?
-  department   Department? @relation(fields: [departmentID], references: [departmentID], onDelete: SetNull, onUpdate: Cascade)
-  auditLogs    AuditLog[]
-  userProjects UserProject[]
-  calls        InternalCallParticipants[]
-}
-
-model AuditLog {
-  logID       Int      @id @default(autoincrement())
-  action      String
-  dateTime    DateTime @default(now())
-  description String?
-  userID      Int?
-  user        User? @relation(fields: [userID], references: [userID], onDelete: SetNull, onUpdate: Cascade)
-}
-
-model Client {
-  email        String @id
-  name         String
-  organization String?
-  description  String?
-  calls        ExternalCallParticipants[]
-  projects     Project[]
+  calls        Call[]
+  techSupportCalls SupportCall[]
+  callParticipants CallParticipant[]
 }
 
 model Project {
@@ -54,22 +28,8 @@ model Project {
   reqNoFuncionales   String?
   startDate          DateTime?
   endDate            DateTime?
-  clientEmail        String?
-  client             Client? @relation(fields: [clientEmail], references: [email], onDelete: Cascade)
-  userProjects       UserProject[]
   calls              Call[]
-  reports            Report[]
-}
-
-model UserProject {
-  userID      Int
-  projectID   Int
-  projectRole String?
-
-  user    User    @relation(fields: [userID], references: [userID], onDelete: Cascade, onUpdate: Cascade)
-  project Project @relation(fields: [projectID], references: [projectID], onDelete: Cascade, onUpdate: Cascade)
-
-  @@id([userID, projectID])
+  projectCalls ProjectCall[]
 }
 
 model Call {
@@ -77,55 +37,54 @@ model Call {
   title     String?
   startTime DateTime?
   endTime   DateTime?
-  summary   String?
   projectID Int?
-  analyzed  Boolean  @default(false)
   project   Project? @relation(fields: [projectID], references: [projectID], onDelete: SetNull, onUpdate: Cascade)
-  internalParticipants InternalCallParticipants[]
-  externalParticipants ExternalCallParticipants[]
-  reportCalls ReportCall[]
+  userID    Int?
+  user      User?    @relation(fields: [userID], references: [userID], onDelete: SetNull, onUpdate: Cascade)
+  projectCalls ProjectCall[]
+  techSupportCalls SupportCall[]
+  callParticipants CallParticipant[]
+  transcription String?
+  callAnalysis CallAnalysis?
 }
 
-model InternalCallParticipants {
-  userID Int
-  callID Int
-
-  user User @relation(fields: [userID], references: [userID], onDelete: Cascade, onUpdate: Cascade)
-  call Call @relation(fields: [callID], references: [callID], onDelete: Cascade, onUpdate: Cascade)
-
-  @@id([userID, callID])
+model ProjectCall {
+  projectCallID Int    @id @default(autoincrement())
+  callID       Int
+  projectID    Int
+  details      String?
+  call         Call   @relation(fields: [callID], references: [callID], onDelete: Cascade)
+  project      Project @relation(fields: [projectID], references: [projectID], onDelete: Cascade)
 }
 
-model ExternalCallParticipants {
-  clientEmail String
-  callID      Int
-
-  client Client @relation(fields: [clientEmail], references: [email], onDelete: Cascade, onUpdate: Cascade)
-  call   Call   @relation(fields: [callID], references: [callID], onDelete: Cascade, onUpdate: Cascade)
-
-  @@id([clientEmail, callID])
+model SupportCall {
+  techSupportCallID Int    @id @default(autoincrement())
+  callID           Int
+  userID           Int
+  issueDescription String?
+  call             Call   @relation(fields: [callID], references: [callID], onDelete: Cascade)
+  user             User   @relation(fields: [userID], references: [userID], onDelete: Cascade)
 }
 
-model Report {
-  reportID    Int      @id @default(autoincrement())
-  reportType  String?
-  generatedAt DateTime?
-  fileURL     String?
-  format      String?
-  projectID   Int?
-  project     Project? @relation(fields: [projectID], references: [projectID], onDelete: SetNull, onUpdate: Cascade)
-  reportCalls ReportCall[]
+model CallParticipant {
+  participantID Int @id @default(autoincrement())
+  callID       Int
+  userID       Int
+  joinedAt     DateTime?
+  leftAt       DateTime?
+  call         Call @relation(fields: [callID], references: [callID], onDelete: Cascade)
+  user         User @relation(fields: [userID], references: [userID], onDelete: Cascade)
 }
 
-model ReportCall {
-  reportID  Int
-  callID    Int
-  callType  String?
-  startTime DateTime?
-  endTime   DateTime?
-
-  report Report? @relation(fields: [reportID], references: [reportID], onDelete: Cascade, onUpdate: Cascade)
-  call   Call    @relation(fields: [callID], references: [callID], onDelete: Cascade, onUpdate: Cascade)
-
-  @@id([reportID, callID])
+model CallAnalysis {
+  analysisID      Int    @id @default(autoincrement())
+  callID          Int   @unique
+  title           String?
+  sentiment       String?
+  finalSentiment  String?
+  solved          Boolean?
+  reasonOfCall    String?
+  resolution      String?
+  lastPhrase      String?
+  call            Call   @relation(fields: [callID], references: [callID], onDelete: Cascade)
 }
