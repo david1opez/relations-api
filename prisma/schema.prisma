@@ -17,6 +17,7 @@ model User {
   calls        Call[]
   techSupportCalls SupportCall[]
   callParticipants CallParticipant[]
+  activityLogs ActivityLog[]
 }
 
 model Project {
@@ -30,6 +31,7 @@ model Project {
   endDate            DateTime?
   calls              Call[]
   projectCalls ProjectCall[]
+  activityLogs ActivityLog[]
 }
 
 model Call {
@@ -55,6 +57,7 @@ model ProjectCall {
   details      String?
   call         Call   @relation(fields: [callID], references: [callID], onDelete: Cascade)
   project      Project @relation(fields: [projectID], references: [projectID], onDelete: Cascade)
+  activityLogs ActivityLog[]
 }
 
 model SupportCall {
@@ -64,6 +67,7 @@ model SupportCall {
   issueDescription String?
   call             Call   @relation(fields: [callID], references: [callID], onDelete: Cascade)
   user             User   @relation(fields: [userID], references: [userID], onDelete: Cascade)
+  activityLogs ActivityLog[]
 }
 
 model CallParticipant {
@@ -87,4 +91,19 @@ model CallAnalysis {
   resolution      String?
   lastPhrase      String?
   call            Call   @relation(fields: [callID], references: [callID], onDelete: Cascade)
+}
+
+model ActivityLog {
+  activityLogID      Int      @id @default(autoincrement())
+  userID             Int
+  action             String
+  timestamp          DateTime @default(now())
+  projectID          Int?
+  projectCallID      Int?
+  techSupportCallID  Int?
+
+  user               User           @relation(fields: [userID], references: [userID], onDelete: Cascade)
+  project            Project?       @relation(fields: [projectID], references: [projectID], onDelete: Cascade)
+  projectCall        ProjectCall?   @relation(fields: [projectCallID], references: [projectCallID], onDelete: Cascade)
+  supportCall        SupportCall?   @relation(fields: [techSupportCallID], references: [techSupportCallID], onDelete: Cascade)
 }
